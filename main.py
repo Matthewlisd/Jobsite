@@ -9,6 +9,7 @@ import torch
 from torch.nn.functional import cosine_similarity
 from transformers import BertTokenizer, BertModel
 from datetime import date as DATE
+from pymongo import MongoClient
 
 
 #Import pretrained BERT
@@ -31,6 +32,7 @@ db_host = os.getenv("db_host")
 db_user = os.getenv("db_user")
 db_password = os.getenv("db_password")
 db_database = os.getenv("db_database")
+Mongo_string = os.getenv("Mongo_string")
 
 connection = mysql.connector.connect(
         host=db_host,
@@ -55,18 +57,30 @@ if connection.is_connected():
         Skills = mycursor.fetchall()
         '''
         mycursor.execute("Select smartend_users.email, smartend_mbamade_skills.Skill, smartend_mbamade_skills.Years, smartend_mbamade_skills.Level FROM smartend_users INNER JOIN smartend_mbamade_skills ON smartend_mbamade_skills.UserId = smartend_users.id")
-        user_profiles = mycursor.fetchall()
-
+        user_data = mycursor.fetchall()
+        print(user_data)
 #Set up today's date for email sending
 TODAY = DATE.today()
 AMERICAN_DATE = TODAY.strftime("%B %d, %Y")
+user_emails = [row[0] for row in user_data]
+#Test for USER skills
+user_skills = [row[1] for row in user_data]
+#user_years = 
 
-#Test for USER shit
-user_profiles = ["USER SKILLS EXPERIENCES HERE"]
+user_profiles = ["Select from Userdata"]
 
 #GET JOB_QUALIFICATIONS from MONGODB
-
-job_qualifications = ["Take from MONGODB"]
+client = MongoClient(Mongo_string)
+db = client["JobSite"]
+collection = db["jobs"]
+jobs = collection.find({}, {"id":1, "title":1, "qualification":1})
+job_id = []
+job_qualifications = []
+for i in jobs:
+    #print(i['id'])
+    job_id.append(i['id'])
+    job_qualifications.append(i['qualification'])
+#job_qualifications = ["Take from MONGODB"]
 # Convert descriptions to embeddings
 user_emails = []
 user_embeddings = []
@@ -89,7 +103,7 @@ user_embeddings = torch.stack(user_embeddings)
 job_embeddings = torch.stack(job_embeddings)
 
 # Compute recommendations for each user
-num_recommendations = min(5, len(job_qualifications))
+num_recommendations = min(10, len(job_qualifications))
 recommendations = {}
 
 for i, user_embed in enumerate(user_embeddings):
@@ -99,7 +113,7 @@ for i, user_embed in enumerate(user_embeddings):
     # Sort jobs by similarity
     _, indices = torch.topk(torch.tensor(similarities), num_recommendations)
     
-    recommendations[user_profiles[i]] = [job_qualifications[j] for j in indices.numpy()]
+    recommendations[user_profiles[i]] = [job_id[j] for j in indices.numpy()]
 
     print(recommendations)
 
@@ -111,8 +125,8 @@ def send_email(subject, receiver_email, name, date, recommendations):
     # Create the base text message.
     msg = EmailMessage()
     msg["Subject"] = subject
-    Tilte = "Your Job Recommendations for " + 
-    msg["From"] = formataddr(("Your Job Recommendations for ", f"{sender_email}"))
+    Title = "Your Job Recommendations for "
+    msg["From"] = formataddr((Title, f"{sender_email}"))
     msg["To"] = receiver_email
     msg["BCC"] = sender_email
 
@@ -153,6 +167,6 @@ if __name__ == "__main__":
         subject="Your Job Recommnedations",
         name="Maththew",
         receiver_email="matthewlisd@gmail.com",
-        date= AMERICAN_DATE
+        date= AMERICAN_DATE,
         recommendations={'USER SKILLS EXPERIENCES HERE': ['Take from MONGODB']}
     )
