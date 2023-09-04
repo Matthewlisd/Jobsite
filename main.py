@@ -153,6 +153,6 @@ if __name__ == "__main__":
         subject="Your Job Recommnedations",
         name="Maththew",
         receiver_email="matthewlisd@gmail.com",
-        date= DATE.today().strftime("%B %d, %Y")
+        date= AMERICAN_DATE
         recommendations={'USER SKILLS EXPERIENCES HERE': ['Take from MONGODB']}
     )
