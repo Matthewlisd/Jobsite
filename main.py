@@ -58,7 +58,22 @@ if connection.is_connected():
         '''
         mycursor.execute("Select smartend_users.email, smartend_mbamade_skills.Skill, smartend_mbamade_skills.Years, smartend_mbamade_skills.Level FROM smartend_users INNER JOIN smartend_mbamade_skills ON smartend_mbamade_skills.UserId = smartend_users.id")
         user_data = mycursor.fetchall()
-        print(user_data)
+        #print(user_data)
+        user_dict = {}
+        for u in user_data:
+            if u[0] not in user_dict.keys():
+                user_dict[u[0]] = str(u[1]) + ", " + str(u[2]) + " years of experiece, " + "Confidence level: " + str(u[3]) + "."
+            
+            else:
+                user_dict[u[0]] += str(u[1]) + ", " + str(u[2]) + " years of experiece, " + "Confidence level: " + str(u[3]) + "."
+        #print(user_dict)
+        user_emails = []
+        user_profiles = []
+        for key, value in user_dict.items():
+            user_emails.append(key)
+            user_profiles.append(value)
+
+
 #Set up today's date for email sending
 TODAY = DATE.today()
 AMERICAN_DATE = TODAY.strftime("%B %d, %Y")
@@ -82,7 +97,6 @@ for i in jobs:
     job_qualifications.append(i['qualification'])
 #job_qualifications = ["Take from MONGODB"]
 # Convert descriptions to embeddings
-user_emails = []
 user_embeddings = []
 job_embeddings = []
 
@@ -113,7 +127,7 @@ for i, user_embed in enumerate(user_embeddings):
     # Sort jobs by similarity
     _, indices = torch.topk(torch.tensor(similarities), num_recommendations)
     
-    recommendations[user_profiles[i]] = [job_id[j] for j in indices.numpy()]
+    recommendations[user_emails[i]] = [job_id[j] for j in indices.numpy()]
 
     print(recommendations)
 
@@ -130,23 +144,15 @@ def send_email(subject, receiver_email, name, date, recommendations):
     msg["To"] = receiver_email
     msg["BCC"] = sender_email
 
-    msg.set_content(
-        f"""\
-        Hi {name},
-        I hope you are well.
-        
-        Matthew Li
-        """
-    )
     # Add the html version.  This converts the message into a multipart/alternative
     # container, with the original text message as the first part and the new html
     # message as the second part.
-    msg.add_alternative(
+    msg.set_content(
         f"""\
     <html>
       <body>
         <p>Hi {name},</p>
-        <p>I hope you are well.<p>
+        <p>Here are the list of jobs recommended for you today, {date}<p>
         <p>Best regards</p>
         <p>Matthew Li</p>
       </body>
@@ -162,7 +168,7 @@ def send_email(subject, receiver_email, name, date, recommendations):
 
 
 if __name__ == "__main__":
-    
+    """
     send_email(
         subject="Your Job Recommnedations",
         name="Maththew",
@@ -170,3 +176,4 @@ if __name__ == "__main__":
         date= AMERICAN_DATE,
         recommendations={'USER SKILLS EXPERIENCES HERE': ['Take from MONGODB']}
     )
+    """

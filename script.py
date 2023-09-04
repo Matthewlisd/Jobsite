@@ -33,11 +33,11 @@ try:
     db = client["JobSite"]
     collection = db["jobs"]
 
-
+    
     if connection.is_connected():
         mycursor = connection.cursor()
         #print("Connected to the database.")
-
+        """
         #Find User id, Details from users
         mycursor.execute("SELECT id, email, Details FROM smartend_users")
 
@@ -51,9 +51,9 @@ try:
             print(m)
         for s in Skills:
             print(s)
-        
+        """
         #print(Skills[0][0])
-        
+
         #Anyway to combine those two datas?
         """
             Store All the data in a databse? or take out when needed? Take out when needed
