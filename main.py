@@ -161,13 +161,13 @@ def send_email(subject, receiver_email, name, date, R):
     for job in R[1]:
         print(job)
         jobs_html += f"<li>{job}</li>"
-        jobs_html += '</ul>'
+    jobs_html += '</ul>'
     msg.set_content(
         f"""\
     <html>
       <body>
         <p>Hi {name},</p>
-        <p>Here are the list of jobs recommended for you today, {date}<p>
+        <p>Here is the list of jobs recommended for you today, {date}<p>
         {jobs_html}
         <p>Best regards</p>
         <p>Matthew Li</p>
