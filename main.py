@@ -77,12 +77,7 @@ if connection.is_connected():
 #Set up today's date for email sending
 TODAY = DATE.today()
 AMERICAN_DATE = TODAY.strftime("%B %d, %Y")
-user_emails = [row[0] for row in user_data]
-#Test for USER skills
-user_skills = [row[1] for row in user_data]
-#user_years = 
 
-user_profiles = ["Select from Userdata"]
 
 #GET JOB_QUALIFICATIONS from MONGODB
 client = MongoClient(Mongo_string)
@@ -95,11 +90,13 @@ job_titles = []
 #Append job URLs here once it's avalible
 job_url = []
 for i in jobs:
-    #print(i['id'])
     job_id.append(i['id'])
     job_qualifications.append(i['qualification'])
     job_titles.append(i['title'])
-#job_qualifications = ["Take from MONGODB"]
+    #Append then URL is ready
+    #job_url.append()
+
+
 # Convert descriptions to embeddings
 user_embeddings = []
 job_embeddings = []
@@ -138,7 +135,7 @@ for i, user_embed in enumerate(user_embeddings):
 
     #Once URL data becomes avalible, append them to this dictionary
     #recoomend_urls[]
-    print(recommendations)
+    #print(recommendations)
 
 
 ####
@@ -157,9 +154,7 @@ def send_email(subject, receiver_email, name, date, R):
     # container, with the original text message as the first part and the new html
     # message as the second part.
     jobs_html = '<ul>'
-    print(R[1])
     for job in R[1]:
-        print(job)
         jobs_html += f"<li>{job}</li>"
     jobs_html += '</ul>'
     msg.set_content(
