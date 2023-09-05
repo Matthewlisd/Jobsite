@@ -7,14 +7,14 @@ from pathlib import Path
 from dotenv import load_dotenv  # pip install python-dotenv
 import torch
 from torch.nn.functional import cosine_similarity
-from transformers import BertTokenizer, BertModel
+from transformers import AlbertTokenizer, AlbertModel
 from datetime import date as DATE
 from pymongo import MongoClient
 
 
 #Import pretrained BERT
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertModel.from_pretrained('bert-base-uncased')
+tokenizer = AlbertTokenizer.from_pretrained('albert-base-v2')
+model = AlbertModel.from_pretrained('albert-base-v2')
 
 
 PORT = 587
@@ -96,19 +96,23 @@ for i in jobs:
     #Append then URL is ready
     #job_url.append()
 
-
+#Data extracted, connection closed
+mycursor.close()
+connection.close()
+client.close()
+print("Connection closed.")
 # Convert descriptions to embeddings
 user_embeddings = []
 job_embeddings = []
 
 for profile in user_profiles:
-    encoded_input = tokenizer(profile, return_tensors='pt', padding=True, truncation=True)
+    encoded_input = tokenizer(profile, return_tensors='pt', padding='max_length', truncation=True, max_length=512)
     with torch.no_grad():
         output = model(**encoded_input)
         user_embeddings.append(output.last_hidden_state[0, 0, :])
 
 for job in job_qualifications:
-    encoded_input = tokenizer(job, return_tensors='pt', padding=True, truncation=True)
+    encoded_input = tokenizer(job, return_tensors='pt', padding='max_length', truncation=True, max_length=512)
     with torch.no_grad():
         output = model(**encoded_input)
         job_embeddings.append(output.last_hidden_state[0, 0, :])
@@ -124,7 +128,7 @@ recommendations = {}
 
 for i, user_embed in enumerate(user_embeddings):
     # Using unsqueeze to get shape (1, embedding_dim) for the user_embed tensor
-    similarities = [cosine_similarity(user_embed.unsqueeze(0), job_embed.unsqueeze(0)) for job_embed in job_embeddings]
+    similarities = [cosine_similarity(user_embed.unsqueeze(0), job_embed.unsqueeze(0)).item() for job_embed in job_embeddings]
     
     # Sort jobs by similarity
     _, indices = torch.topk(torch.tensor(similarities), num_recommendations)
