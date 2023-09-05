@@ -91,10 +91,14 @@ collection = db["jobs"]
 jobs = collection.find({}, {"id":1, "title":1, "qualification":1})
 job_id = []
 job_qualifications = []
+job_titles = []
+#Append job URLs here once it's avalible
+job_url = []
 for i in jobs:
     #print(i['id'])
     job_id.append(i['id'])
     job_qualifications.append(i['qualification'])
+    job_titles.append(i['title'])
 #job_qualifications = ["Take from MONGODB"]
 # Convert descriptions to embeddings
 user_embeddings = []
@@ -119,6 +123,7 @@ job_embeddings = torch.stack(job_embeddings)
 # Compute recommendations for each user
 num_recommendations = min(10, len(job_qualifications))
 recommendations = {}
+#recommend_names = {}
 
 for i, user_embed in enumerate(user_embeddings):
     # Using unsqueeze to get shape (1, embedding_dim) for the user_embed tensor
@@ -127,8 +132,12 @@ for i, user_embed in enumerate(user_embeddings):
     # Sort jobs by similarity
     _, indices = torch.topk(torch.tensor(similarities), num_recommendations)
     
-    recommendations[user_emails[i]] = [job_id[j] for j in indices.numpy()]
+    recommendations[user_emails[i]] = [[job_id[j] for j in indices.numpy()], [job_titles[j] for j in indices.numpy()]]
 
+    #recommend_names[user_emails[i]] = [job_titles[j] for j in indices.numpy()]
+
+    #Once URL data becomes avalible, append them to this dictionary
+    #recoomend_urls[]
     print(recommendations)
 
 
@@ -147,12 +156,17 @@ def send_email(subject, receiver_email, name, date, recommendations):
     # Add the html version.  This converts the message into a multipart/alternative
     # container, with the original text message as the first part and the new html
     # message as the second part.
+    jobs_html = '<ul>'
+    for job in recommendations[1]:
+        jobs_html += f"<li>{job}</li>"
+        jobs_html += '</ul>'
     msg.set_content(
         f"""\
     <html>
       <body>
         <p>Hi {name},</p>
         <p>Here are the list of jobs recommended for you today, {date}<p>
+        {jobs_html}
         <p>Best regards</p>
         <p>Matthew Li</p>
       </body>
@@ -168,12 +182,12 @@ def send_email(subject, receiver_email, name, date, recommendations):
 
 
 if __name__ == "__main__":
-    """
-    send_email(
-        subject="Your Job Recommnedations",
-        name="Maththew",
-        receiver_email="matthewlisd@gmail.com",
-        date= AMERICAN_DATE,
-        recommendations={'USER SKILLS EXPERIENCES HERE': ['Take from MONGODB']}
+    for key, value in user_dict.items():
+        send_email(
+            subject="Your Job Recommnedations",
+            name= key,
+            receiver_email="matthewlisd@gmail.com",
+            date= AMERICAN_DATE,
+            recommendations= value
     )
-    """
+    
