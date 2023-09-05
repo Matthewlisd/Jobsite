@@ -144,11 +144,11 @@ for i, user_embed in enumerate(user_embeddings):
 ####
 
 #Compile Email that sends out the recommendatations
-def send_email(subject, receiver_email, name, date, recommendations):
+def send_email(subject, receiver_email, name, date, R):
     # Create the base text message.
     msg = EmailMessage()
     msg["Subject"] = subject
-    Title = "Your Job Recommendations for "
+    Title = "Your Job Recommendations"
     msg["From"] = formataddr((Title, f"{sender_email}"))
     msg["To"] = receiver_email
     msg["BCC"] = sender_email
@@ -157,7 +157,9 @@ def send_email(subject, receiver_email, name, date, recommendations):
     # container, with the original text message as the first part and the new html
     # message as the second part.
     jobs_html = '<ul>'
-    for job in recommendations[1]:
+    print(R[1])
+    for job in R[1]:
+        print(job)
         jobs_html += f"<li>{job}</li>"
         jobs_html += '</ul>'
     msg.set_content(
@@ -182,12 +184,12 @@ def send_email(subject, receiver_email, name, date, recommendations):
 
 
 if __name__ == "__main__":
-    for key, value in user_dict.items():
+    for key, value in recommendations.items():
         send_email(
             subject="Your Job Recommnedations",
             name= key,
             receiver_email="matthewlisd@gmail.com",
             date= AMERICAN_DATE,
-            recommendations= value
+            R= value
     )
     
